@@ -1,0 +1,16 @@
+--- #YAML:1.0
+name: Maypole-Plugin-AutoUntaint
+version: 0.01
+author:
+  - David Baird <cpan@riverside-cms.co.uk>
+abstract: CDBI::AutoUntaint for Maypole
+license: perl
+requires:
+  Class::DBI::Plugin::AutoUntaint: 0
+  NEXT: 0
+  Test::More: 0
+provides:
+  Maypole::Plugin::AutoUntaint:
+    file: lib/Maypole/Plugin/AutoUntaint.pm
+    version: 0.01
+generated_by: Module::Build version 0.2609
