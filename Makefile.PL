@@ -7,7 +7,8 @@ WriteMakefile
           'PREREQ_PM' => {
                            'Class::DBI::Plugin::AutoUntaint' => '0',
                            'NEXT' => '0',
-                           'Test::More' => '0'
+                           'Test::More' => '0',
+                           'UNIVERSAL::require' => '0'
                          },
           'INSTALLDIRS' => 'site',
           'PL_FILES' => {}

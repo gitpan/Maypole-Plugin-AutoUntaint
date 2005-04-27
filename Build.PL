@@ -11,6 +11,7 @@ my $builder = Module::Build->new(
         'Test::More' => 0,
         'NEXT' => 0,
         'Class::DBI::Plugin::AutoUntaint' => 0,
+        'UNIVERSAL::require' => 0,
     },
     add_to_cleanup      => [ 'Maypole-Plugin-AutoUntaint-*' ],
     create_makefile_pl  => 'traditional',

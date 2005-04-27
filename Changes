@@ -1,5 +1,10 @@
 Revision history for Maypole-Plugin-AutoUntaint
 
+0.02    Wed  27 Apr 2005 22:00
+        - pod updates
+        - removed hackery to deal with Maypole not dying on cue,
+            since in fact it does.
+
 0.01    Date/time
         First version, released on an unsuspecting world.
 

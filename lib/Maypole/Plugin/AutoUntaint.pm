@@ -1,5 +1,7 @@
 package Maypole::Plugin::AutoUntaint;
 
+use UNIVERSAL::require;
+
 use warnings;
 use strict;
 
@@ -11,13 +13,9 @@ Class::DBI::Plugin::AutoUntaint->require;
 
 Maypole::Plugin::AutoUntaint - CDBI::AutoUntaint for Maypole
 
-=head1 VERSION
-
-Version 0.01
-
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = 0.02;
 
 =head1 SYNOPSIS
 
@@ -82,7 +80,7 @@ sub auto_untaint {
     # insert CDBI::Plugin::AutoUntaint into the model class
     {
         my $model = $r->config->model ||
-            warn "Please configure a model in $r before calling auto_untaint()";
+            die "Please configure a model in $r before calling auto_untaint()";
         no strict 'refs';
         *{"$model\::auto_untaint"} = \&Class::DBI::Plugin::AutoUntaint::auto_untaint;
     }
@@ -91,33 +89,41 @@ sub auto_untaint {
 
     foreach my $table ( @$untaint_tables )
     {
-        eval {
-            my %targs = map { $_ => $args{ $_ } } qw( untaint_types match_types );
-            
-            $targs{untaint_columns} = $args{untaint_columns}->{ $table };
-            $targs{skip_columns}    = $args{skip_columns}->{ $table };
-            
-            $targs{match_columns} = $args{match_columns};
-            
-            if ( my $more_match_cols = $args{match_columns_by_table}->{ $table } )
-            {
-                $targs{match_columns}->{ $_ } = $more_match_cols->{ $_ } 
-                    for keys %$more_match_cols;
-            }
-                                        
-            $targs{debug} = $r->debug;
-            $targs{maypole} = 1;
-            
-            my $class = $r->config->loader->find_class( $table );
+        my %targs = map { $_ => $args{ $_ } } qw( untaint_types match_types );
         
-            $class->auto_untaint( %targs );
-        };
+        $targs{untaint_columns} = $args{untaint_columns}->{ $table };
+        $targs{skip_columns}    = $args{skip_columns}->{ $table };
         
-        warn $@ if $@;
+        $targs{match_columns} = $args{match_columns};
+        
+        if ( my $more_match_cols = $args{match_columns_by_table}->{ $table } )
+        {
+            $targs{match_columns}->{ $_ } = $more_match_cols->{ $_ } 
+                for keys %$more_match_cols;
+        }
+                                    
+        $targs{debug} = $r->debug;
+        $targs{maypole} = 1;
+        
+        my $class = $r->config->loader->find_class( $table );
+    
+        $class->auto_untaint( %targs );
     }
 }
 
 =back
+
+=head1 TODO
+
+Tests!
+
+=head1 SEE ALSO
+
+L<Class::DBI::Plugin::AutoUntaint|Class::DBI::Plugin::AutoUntaint> does the 
+hard work, and describes the arguments in more detail.
+
+L<Maypole::Plugin::Untaint>.
+
 
 =head1 AUTHOR
 
