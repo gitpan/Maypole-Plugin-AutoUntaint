@@ -1,5 +1,13 @@
 Revision history for Maypole-Plugin-AutoUntaint
 
+0.04    Thur 28 Apr 2005 15:20
+        - loads CDBI::Plugin::Type into the model class, which is now 
+            needed by CDBI::Plugin::AutoUntaint
+        - using CDBI::Plugin::AutoUntaint's strict mode
+
+0.03    Thur 28 Apr 2005 09:15
+        - pod updates
+
 0.02    Wed  27 Apr 2005 22:00
         - pod updates
         - removed hackery to deal with Maypole not dying on cue,

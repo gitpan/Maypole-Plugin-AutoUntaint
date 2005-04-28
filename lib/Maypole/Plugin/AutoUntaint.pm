@@ -15,7 +15,7 @@ Maypole::Plugin::AutoUntaint - CDBI::AutoUntaint for Maypole
 
 =cut
 
-our $VERSION = 0.03;
+our $VERSION = 0.04;
 
 =head1 SYNOPSIS
 
@@ -95,22 +95,29 @@ Specifies the tables to untaint as an arrayref. Defaults to C<<$r->config->{disp
 
 =item debug
 
-If the debug level in the Maypole application is set to 1, this module will report 
-(via C<warn>) each table it processes. 
+The debug level of the Maypole application is passed on to L<Class::DBI::Plugin::AutoUntaint|Class::DBI::Plugin::AutoUntaint>. If set to 1, this 
+notes (via C<warn>) each table processed. 
 
 If the debug level is set to 2, it will report the untaint type used for each column.
+
+If debug mode is turned off, this module switches on L<Class::DBI::Plugin::AutoUntaint|Class::DBI::Plugin::AutoUntaint>'s 'strict' mode.
 
 =cut
 
 sub auto_untaint {
     my ( $r, %args ) = @_;
     
-    # insert CDBI::Plugin::AutoUntaint into the model class
+    # insert CDBI::Plugin::AutoUntaint and CDBI::Plugin::Type into the model class
     {
         my $model = $r->config->model ||
             die "Please configure a model in $r before calling auto_untaint()";
+        
         no strict 'refs';
         *{"$model\::auto_untaint"} = \&Class::DBI::Plugin::AutoUntaint::auto_untaint;
+        
+        # need to call CDBIP::Type::import() from context of $model
+        eval "package $model; use Class::DBI::Plugin::Type";
+        die $@ if $@;
     }
     
     my $untaint_tables = $args{untaint_tables} || $r->config->{display_tables};
@@ -131,7 +138,8 @@ sub auto_untaint {
         }
                                     
         $targs{debug} = $r->debug;
-        $targs{maypole} = 1;
+        
+        $targs{strict} = 1 unless $r->debug;
         
         my $class = $r->config->loader->find_class( $table );
     
