@@ -15,13 +15,23 @@ Maypole::Plugin::AutoUntaint - CDBI::AutoUntaint for Maypole
 
 =cut
 
-our $VERSION = 0.02;
+our $VERSION = 0.03;
 
 =head1 SYNOPSIS
 
     package BeerDB;
     use Maypole::Application qw( AutoUntaint );
     
+    # instead of this
+    #BeerDB::Brewery->untaint_columns( printable => [qw/name notes url/] );
+    #BeerDB::Style->  untaint_columns( printable => [qw/name notes/] );
+    #BeerDB::Pub->    untaint_columns( printable => {qw/name notes url/] );
+    #BeerDB::Beer->   untaint_columns( printable => [qw/abv name price notes/],
+    #                                 integer    => [qw/style brewery score/],
+    #                                 date       => [ qw/date/],
+    #                                 );   
+    
+    # say this
     BeerDB->auto_untaint;
 
 =over 4
@@ -29,7 +39,7 @@ our $VERSION = 0.02;
 =item setup
 
 If the C<-Setup> flag is passed in the call to L<Maypole::Application|Maypole::Application>,
-C<auto_untaint> will be called automatically, with no arguments. [not tested]
+C<auto_untaint> will be called automatically, with no arguments. 
 
 =cut
 
@@ -45,32 +55,50 @@ sub setup
 =item auto_untaint( %args )
 
 Takes the same arguments as C<Class::DBI::AutoUntaint::auto_untaint()>, but 
-the C<untaint_columns> and C<skip_columns> hashrefs must be further keyed by table:
+C<untaint_columns> and C<skip_columns> must be further keyed by table:
+
+=over 4
+
+=item untaint_columns
     
-    untaint_columns => { $table => { $untaint_as => [ qw( col1 col2 ) ], 
-                                     ...,
+    untaint_columns => { $table => { printable => [ qw( name title ) ],
+                                     date => [ qw( birthday ) ],
                                      },
                          ...,
                          },
+                         
+=item skip_columns
    
-    skip_columns => { $table => [ qw( colx coly ) ],
+    skip_columns => { $table => [ qw( secret_stuff internal_data )  ],
                       ...,
                       },
                       
 Accepts two additional arguments. C<match_cols_by_table> is the same as the 
 C<match_cols> argument, but only applies to specific tables: 
 
-    match_cols_by_table => { $table => { $col_regex => $untaint_as,
-                                         ...,
+=item match_cols_by_table
+
+    match_cols_by_table => { $table => { qr(^(first|last)_name$) => 'printable',
+                                         qr(^.+_event$)          => 'date',
+                                         qr(^count_.+$)          => 'integer',
                                          },
                              ...,
                              },
                              
-Column regexes in <match_cols_by_table> that are the same as any in <match_cols>
-will take precedence.
+Column regexes here take precedence over any in <match_cols> that are the same.
 
-C<untaint_tables> specifies the tables to untaint as an arrayref. Defaults to 
-C<$r->config->{display_tables}>.
+=item untaint_tables
+
+Specifies the tables to untaint as an arrayref. Defaults to C<<$r->config->{display_tables}>>.
+
+=back
+
+=item debug
+
+If the debug level in the Maypole application is set to 1, this module will report 
+(via C<warn>) each table it processes. 
+
+If the debug level is set to 2, it will report the untaint type used for each column.
 
 =cut
 
@@ -119,11 +147,10 @@ Tests!
 
 =head1 SEE ALSO
 
-L<Class::DBI::Plugin::AutoUntaint|Class::DBI::Plugin::AutoUntaint> does the 
-hard work, and describes the arguments in more detail.
+This module wraps L<Class::DBI::Plugin::AutoUntaint|Class::DBI::Plugin::AutoUntaint>, 
+which describes the arguments in more detail.
 
 L<Maypole::Plugin::Untaint>.
-
 
 =head1 AUTHOR
 
@@ -136,8 +163,6 @@ C<bug-maypole-plugin-autountaint@rt.cpan.org>, or through the web interface at
 L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Maypole-Plugin-AutoUntaint>.
 I will be notified, and then you'll automatically be notified of progress on
 your bug as I make changes.
-
-=head1 ACKNOWLEDGEMENTS
 
 =head1 COPYRIGHT & LICENSE
 
