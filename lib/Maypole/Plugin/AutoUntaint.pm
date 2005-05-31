@@ -15,7 +15,7 @@ Maypole::Plugin::AutoUntaint - CDBI::AutoUntaint for Maypole
 
 =cut
 
-our $VERSION = 0.04;
+our $VERSION = 0.05;
 
 =head1 SYNOPSIS
 
@@ -27,9 +27,9 @@ our $VERSION = 0.04;
     #BeerDB::Style->  untaint_columns( printable => [qw/name notes/] );
     #BeerDB::Pub->    untaint_columns( printable => {qw/name notes url/] );
     #BeerDB::Beer->   untaint_columns( printable => [qw/abv name price notes/],
-    #                                 integer    => [qw/style brewery score/],
-    #                                 date       => [ qw/date/],
-    #                                 );   
+    #                                  integer    => [qw/style brewery score/],
+    #                                  date       => [ qw/date/],
+    #                                  );   
     
     # say this
     BeerDB->auto_untaint;
@@ -38,8 +38,8 @@ our $VERSION = 0.04;
 
 =item setup
 
-If the C<-Setup> flag is passed in the call to L<Maypole::Application|Maypole::Application>,
-C<auto_untaint> will be called automatically, with no arguments. 
+Installs the C<Class::DBI::Plugin::AutoUntaint::auto_untaint()> method into the model
+class.
 
 =cut
 
@@ -47,9 +47,19 @@ sub setup
 {
     my $r = shift;
     
+    # ensure Maypole::setup() is called, which will load the model class
     $r->NEXT::DISTINCT::setup( @_ );
 
-    $r->auto_untaint;
+    # insert CDBI::Plugin::AutoUntaint and CDBI::Plugin::Type into the model class
+    my $model = $r->config->model ||
+        die "Please configure a model in $r before calling auto_untaint()";
+    
+    no strict 'refs';
+    *{"$model\::auto_untaint"} = \&Class::DBI::Plugin::AutoUntaint::auto_untaint;
+    
+    eval "package $model; use Class::DBI::Plugin::Type";
+    
+    die $@ if $@;
 }
 
 =item auto_untaint( %args )
@@ -106,19 +116,6 @@ If debug mode is turned off, this module switches on L<Class::DBI::Plugin::AutoU
 
 sub auto_untaint {
     my ( $r, %args ) = @_;
-    
-    # insert CDBI::Plugin::AutoUntaint and CDBI::Plugin::Type into the model class
-    {
-        my $model = $r->config->model ||
-            die "Please configure a model in $r before calling auto_untaint()";
-        
-        no strict 'refs';
-        *{"$model\::auto_untaint"} = \&Class::DBI::Plugin::AutoUntaint::auto_untaint;
-        
-        # need to call CDBIP::Type::import() from context of $model
-        eval "package $model; use Class::DBI::Plugin::Type";
-        die $@ if $@;
-    }
     
     my $untaint_tables = $args{untaint_tables} || $r->config->{display_tables};
 
