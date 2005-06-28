@@ -15,7 +15,7 @@ Maypole::Plugin::AutoUntaint - CDBI::AutoUntaint for Maypole
 
 =cut
 
-our $VERSION = 0.06;
+our $VERSION = 0.07;
 
 =head1 SYNOPSIS
 

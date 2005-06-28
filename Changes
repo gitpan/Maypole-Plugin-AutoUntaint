@@ -1,5 +1,8 @@
 Revision history for Maypole-Plugin-AutoUntaint
 
+0.07    Tues 28 Jun 2005 12:40
+        - fixed bug in auto_untaint to catch non-existent classes (thanks Will Hawes)
+
 0.05    Tues 31 May 2005 21:15
         - moved installation of CDBI::P::AutoUntaint::auto_untaint() into model 
             from start of MM::P::AutoUntaint::auto_untaint() to setup(). Otherwise, 
