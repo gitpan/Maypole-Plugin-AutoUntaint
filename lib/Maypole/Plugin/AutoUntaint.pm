@@ -15,7 +15,7 @@ Maypole::Plugin::AutoUntaint - CDBI::AutoUntaint for Maypole
 
 =cut
 
-our $VERSION = 0.05;
+our $VERSION = 0.06;
 
 =head1 SYNOPSIS
 
@@ -139,6 +139,8 @@ sub auto_untaint {
         $targs{strict} = 1 unless $r->debug;
         
         my $class = $r->config->loader->find_class( $table );
+        
+        die "no class exists for table '$table'" unless $class;
     
         $class->auto_untaint( %targs );
     }
